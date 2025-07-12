@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Timestamp
+TIMESTAMP=$(date +%s)
+
 # CPU Frequency
 CPU_CORE0_FREQ=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)
 CPU_CORE1_FREQ=$(cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq)
@@ -31,7 +34,9 @@ jq \
     --argjson VCGENCMD_ARM_FREQ "${VCGENCMD_ARM_FREQ}" \
     --argjson NVME0_TEMPERATURE "${NVME0_TEMPERATURE}" \
     --argjson NVME1_TEMPERATURE "${NVME1_TEMPERATURE}" \
+    --argjson TIMESTAMP "${TIMESTAMP}" \
     '{
+        timestamp: { value: $TIMESTAMP, unit: "s" },
         cpu_core0_freq: { value: $CPU_CORE0_FREQ, unit: "kHz" },
         cpu_core1_freq: { value: $CPU_CORE1_FREQ, unit: "kHz" },
         cpu_core2_freq: { value: $CPU_CORE2_FREQ, unit: "kHz" },
