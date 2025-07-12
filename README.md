@@ -19,11 +19,11 @@ A system monitoring script for Raspberry Pi 5 with dual NVMe HAT that collects h
 
 ### Single measurement
 ```sh
-sudo ./pimoni.sh
+sudo ./readings.sh
 ```
 
 ### Continuous monitoring
 ```sh
 # Log measurements every 5 seconds to JSONL file
-sudo ./watch.sh 5 "./pimoni.sh | jq --compact-output >> log.jsonl"
+sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
 ```
