@@ -25,5 +25,5 @@ sudo ./pimoni.sh
 ### Continuous monitoring
 ```sh
 # Log measurements every 5 seconds to JSONL file
-sudo ./watch.sh 5 "./pimoni.sh >> log.jsonl"
+sudo ./watch.sh 5 "./pimoni.sh | jq --compact-output >> log.jsonl"
 ```
