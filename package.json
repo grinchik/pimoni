@@ -1,0 +1,10 @@
+{
+  "name": "pimoni",
+  "private": true,
+  "scripts": {
+    "test": "./scripts/test.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13"
+  }
+}
