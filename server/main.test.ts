@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 import { Readable } from 'node:stream';
 import { createInterface } from 'readline';
+import { createServer } from 'http';
 import { CircularBuffer } from './CircularBuffer.ts';
 import { main } from './main.ts';
 
@@ -22,7 +23,8 @@ describe('main', () => {
             terminal: false,
         });
 
-        main(buffer, rl);
+        const server = createServer();
+        main(buffer, rl, server);
 
         assert.equal(rl.listenerCount('line'), 1);
 
@@ -37,7 +39,8 @@ describe('main', () => {
             terminal: false,
         });
 
-        main(buffer, rl);
+        const server = createServer();
+        main(buffer, rl, server);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));
         mockInputStream.writeLine('first line');
@@ -60,7 +63,8 @@ describe('main', () => {
             terminal: false,
         });
 
-        main(buffer, rl);
+        const server = createServer();
+        main(buffer, rl, server);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));
         mockInputStream.writeLine('line 1');
@@ -87,7 +91,8 @@ describe('main', () => {
             terminal: false,
         });
 
-        main(buffer, rl);
+        const server = createServer();
+        main(buffer, rl, server);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));
         mockInputStream.writeLine('');
