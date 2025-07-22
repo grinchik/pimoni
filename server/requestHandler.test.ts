@@ -17,9 +17,10 @@ describe('requestHandler', () => {
         assert.equal(handler.length, 2);
     });
 
-    test('handler calls writeHead and end methods', () => {
-        const buffer = new CircularBuffer<string>(2);
-        buffer.push('test');
+    test('handler calls writeHead, write and end methods for SSE', () => {
+        const buffer = new CircularBuffer<string>(3);
+        buffer.push('line1');
+        buffer.push('line2');
 
         const handler = requestHandler(buffer);
 
@@ -27,7 +28,7 @@ describe('requestHandler', () => {
         let endCalled = false;
         let statusCode = 0;
         let headers: Record <string, string> = {};
-        let responseData = '';
+        let writeData: string[] = [];
 
         const mockRes = {
             writeHead: (code: number, hdrs: Record <string, string>) => {
@@ -35,9 +36,11 @@ describe('requestHandler', () => {
                 statusCode = code;
                 headers = hdrs;
             },
-            end: (data: string) => {
+            write: (data: string) => {
+                writeData.push(data);
+            },
+            end: () => {
                 endCalled = true;
-                responseData = data;
             }
         };
 
@@ -46,7 +49,10 @@ describe('requestHandler', () => {
         assert.equal(writeHeadCalled, true);
         assert.equal(endCalled, true);
         assert.equal(statusCode, 200);
-        assert.equal(headers['Content-Type'], 'application/json');
-        assert.equal(responseData, JSON.stringify(['test']));
+        assert.equal(headers['Content-Type'], 'text/event-stream');
+        assert.equal(headers['Cache-Control'], 'no-cache');
+        assert.equal(writeData.length, 2);
+        assert.equal(writeData[0], 'data: line1\n\n');
+        assert.equal(writeData[1], 'data: line2\n\n');
     });
 });
