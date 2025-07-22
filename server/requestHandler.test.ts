@@ -7,22 +7,25 @@ import { requestHandler } from './requestHandler.ts';
 describe('requestHandler', () => {
     test('returns handler function', () => {
         const buffer = new CircularBuffer<string>(3);
-        const handler = requestHandler(buffer);
+        const clientSet = new Set<ServerResponse>();
+        const handler = requestHandler(buffer, clientSet);
         assert.equal(typeof handler, 'function');
     });
 
     test('handler function accepts req and res parameters', () => {
         const buffer = new CircularBuffer<string>(3);
-        const handler = requestHandler(buffer);
+        const clientSet = new Set<ServerResponse>();
+        const handler = requestHandler(buffer, clientSet);
         assert.equal(handler.length, 2);
     });
 
-    test('handler calls writeHead, write and end methods for SSE', () => {
+    test('handler calls writeHead and write methods for SSE, keeps connection alive', () => {
         const buffer = new CircularBuffer<string>(3);
         buffer.push('line1');
         buffer.push('line2');
 
-        const handler = requestHandler(buffer);
+        const clientSet = new Set<ServerResponse>();
+        const handler = requestHandler(buffer, clientSet);
 
         let writeHeadCalled = false;
         let endCalled = false;
@@ -41,13 +44,14 @@ describe('requestHandler', () => {
             },
             end: () => {
                 endCalled = true;
-            }
+            },
+            on: () => {}
         };
 
-        handler({} as IncomingMessage, mockRes as ServerResponse);
+        handler({} as IncomingMessage, mockRes as unknown as ServerResponse);
 
         assert.equal(writeHeadCalled, true);
-        assert.equal(endCalled, true);
+        assert.equal(endCalled, false);
         assert.equal(statusCode, 200);
         assert.equal(headers['Content-Type'], 'text/event-stream');
         assert.equal(headers['Cache-Control'], 'no-cache');
