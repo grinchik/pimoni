@@ -1,10 +1,13 @@
-export class CircularBuffer <T> {
+import { EventEmitter } from 'events';
+
+export class CircularBuffer <T> extends EventEmitter {
     private buffer: T[];
     private head: number = 0;
     private size: number = 0;
     private readonly capacity: number;
 
     constructor (capacity: number) {
+        super();
         if (capacity <= 0) {
             throw new Error(CircularBuffer.ERR_INVALID_CAPACITY);
         }
@@ -20,6 +23,8 @@ export class CircularBuffer <T> {
         if (this.size < this.capacity) {
             this.size++;
         }
+
+        this.emit('push', item);
     }
 
     public toArray (): T[] {

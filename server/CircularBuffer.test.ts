@@ -64,6 +64,21 @@ describe('CircularBuffer', () => {
         assert.deepEqual(buffer.toArray(), ['world', '!']);
     });
 
+    test('emits push event when item is added', () => {
+        const buffer = new CircularBuffer<string>(3);
+        const pushedItems: string[] = [];
+        
+        buffer.on('push', (item) => {
+            pushedItems.push(item);
+        });
+        
+        buffer.push('item1');
+        buffer.push('item2');
+        buffer.push('item3');
+        
+        assert.deepEqual(pushedItems, ['item1', 'item2', 'item3']);
+    });
+
     describe('CircularBuffer with capacity 1', () => {
         test('should initialize empty with capacity 1', () => {
             const buffer = new CircularBuffer<number>(1);
