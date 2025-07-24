@@ -1,10 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { CircularBuffer } from './CircularBuffer.ts';
-import type { Line } from './Line.ts';
+import { ClientSet } from './ClientSet.ts';
 
 export function requestHandler(
-    lineCircularBuffer: CircularBuffer<Line>,
-    clientSet: Set<ServerResponse>,
+    clientSet: ClientSet,
 ) {
     return (req: IncomingMessage, res: ServerResponse) => {
         res.writeHead(200, {
@@ -12,13 +10,6 @@ export function requestHandler(
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive'
         });
-
-        const lines = lineCircularBuffer.toArray();
-        // TODO: catch throws or false return from write
-        // TODO: check res.destroyed to avoid writing to zombie connections
-        for (const line of lines) {
-            res.write(`data: ${line}\n\n`);
-        }
 
         // Add client to active connections
         clientSet.add(res);

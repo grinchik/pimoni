@@ -1,31 +1,25 @@
 import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 import { IncomingMessage, ServerResponse } from 'http';
-import { CircularBuffer } from './CircularBuffer.ts';
+import { ClientSet } from './ClientSet.ts';
 import { requestHandler } from './requestHandler.ts';
 
 describe('requestHandler', () => {
     test('returns handler function', () => {
-        const buffer = new CircularBuffer<string>(3);
-        const clientSet = new Set<ServerResponse>();
-        const handler = requestHandler(buffer, clientSet);
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
         assert.equal(typeof handler, 'function');
     });
 
     test('handler function accepts req and res parameters', () => {
-        const buffer = new CircularBuffer<string>(3);
-        const clientSet = new Set<ServerResponse>();
-        const handler = requestHandler(buffer, clientSet);
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
         assert.equal(handler.length, 2);
     });
 
     test('handler calls writeHead and write methods for SSE, keeps connection alive', () => {
-        const buffer = new CircularBuffer<string>(3);
-        buffer.push('line1');
-        buffer.push('line2');
-
-        const clientSet = new Set<ServerResponse>();
-        const handler = requestHandler(buffer, clientSet);
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
 
         let writeHeadCalled = false;
         let endCalled = false;
@@ -39,12 +33,6 @@ describe('requestHandler', () => {
                 statusCode = code;
                 headers = hdrs;
             },
-            write: (data: string) => {
-                writeData.push(data);
-            },
-            end: () => {
-                endCalled = true;
-            },
             on: () => {}
         };
 
@@ -55,8 +43,65 @@ describe('requestHandler', () => {
         assert.equal(statusCode, 200);
         assert.equal(headers['Content-Type'], 'text/event-stream');
         assert.equal(headers['Cache-Control'], 'no-cache');
-        assert.equal(writeData.length, 2);
-        assert.equal(writeData[0], 'data: line1\n\n');
-        assert.equal(writeData[1], 'data: line2\n\n');
+        assert.equal(writeData.length, 0);
+    });
+
+    test('adds client to clientSet when handler is called', () => {
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
+
+        const mockRes = {
+            writeHead: () => {},
+            on: () => {}
+        } as unknown as ServerResponse;
+
+        handler({} as IncomingMessage, mockRes);
+
+        assert.equal(clientSet.clientSet.size, 1);
+        assert.ok(clientSet.clientSet.has(mockRes));
+    });
+
+    test('removes client from clientSet on close event', () => {
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
+
+        let closeHandler: () => void;
+        const mockRes = {
+            writeHead: () => {},
+            on: (event: string, callback: () => void) => {
+                if (event === 'close') {
+                    closeHandler = callback;
+                }
+            }
+        } as unknown as ServerResponse;
+
+        handler({} as IncomingMessage, mockRes);
+        assert.equal(clientSet.clientSet.size, 1);
+
+        // Trigger close event
+        closeHandler!();
+        assert.equal(clientSet.clientSet.size, 0);
+    });
+
+    test('removes client from clientSet on error event', () => {
+        const clientSet = new ClientSet();
+        const handler = requestHandler(clientSet);
+
+        let errorHandler: () => void;
+        const mockRes = {
+            writeHead: () => {},
+            on: (event: string, callback: () => void) => {
+                if (event === 'error') {
+                    errorHandler = callback;
+                }
+            }
+        } as unknown as ServerResponse;
+
+        handler({} as IncomingMessage, mockRes);
+        assert.equal(clientSet.clientSet.size, 1);
+
+        // Trigger error event
+        errorHandler!();
+        assert.equal(clientSet.clientSet.size, 0);
     });
 });

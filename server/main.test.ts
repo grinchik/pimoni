@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 import { Readable } from 'node:stream';
 import { createInterface } from 'readline';
-import { createServer, ServerResponse } from 'http';
+import { createServer } from 'http';
 import { CircularBuffer } from './CircularBuffer.ts';
+import { ClientSet } from './ClientSet.ts';
 import { main } from './main.ts';
 
 class MockInputStream extends Readable {
@@ -24,7 +25,7 @@ describe('main', () => {
         });
 
         const server = createServer();
-        const clientSet = new Set<ServerResponse>();
+        const clientSet = new ClientSet();
         main(buffer, rl, server, clientSet);
 
         assert.equal(rl.listenerCount('line'), 1);
@@ -41,7 +42,7 @@ describe('main', () => {
         });
 
         const server = createServer();
-        const clientSet = new Set<ServerResponse>();
+        const clientSet = new ClientSet();
         main(buffer, rl, server, clientSet);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));
@@ -66,7 +67,7 @@ describe('main', () => {
         });
 
         const server = createServer();
-        const clientSet = new Set<ServerResponse>();
+        const clientSet = new ClientSet();
         main(buffer, rl, server, clientSet);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));
@@ -95,7 +96,7 @@ describe('main', () => {
         });
 
         const server = createServer();
-        const clientSet = new Set<ServerResponse>();
+        const clientSet = new ClientSet();
         main(buffer, rl, server, clientSet);
 
         const p1 = new Promise(resolve => rl.once('line', resolve));

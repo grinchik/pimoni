@@ -1,6 +1,7 @@
 import { createInterface } from 'readline';
-import { createServer, ServerResponse } from 'http';
+import { createServer } from 'http';
 import { CircularBuffer } from './CircularBuffer.ts';
+import { ClientSet } from './ClientSet.ts';
 import { main } from './main.ts';
 import type { Line } from './Line.ts';
 
@@ -16,7 +17,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     const server = createServer();
 
-    const clientSet = new Set<ServerResponse>();
+    const clientSet = new ClientSet();
 
     main(lineCircularBuffer, rl, server, clientSet);
 
