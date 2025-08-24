@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import json
 from collections import deque
 
 if len(sys.argv) != 2:
@@ -15,7 +16,15 @@ for line in sys.stdin:
 
     BUFFER.append(line)
 
-    for item in BUFFER:
-        print(item)
+    BUFFER_LIST = []
 
+    for item in BUFFER:
+        try:
+            PARSED_ITEM = json.loads(item)
+        except json.JSONDecodeError:
+            continue
+
+        BUFFER_LIST.append(PARSED_ITEM)
+
+    print(json.dumps(BUFFER_LIST))
     sys.stdout.flush()
