@@ -12,7 +12,7 @@ BUFFER_SIZE = int(sys.argv[1])
 BUFFER = deque(maxlen=BUFFER_SIZE)
 
 for line in sys.stdin:
-    line = line.rstrip('\n')
+    line = line.strip()
 
     BUFFER.append(line)
 
