@@ -31,3 +31,9 @@ sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
 # Monitor with thermal protection (automatic shutdown at 75°C)
 sudo ./watch.sh 5 "./readings.sh | jq --compact-output | tee --append log.jsonl | ./thermal-shutdown.sh 75"
 ```
+
+### Continuous monitoring with visual file output
+```sh
+# Render table of last N measurements to file
+sudo ./watch.sh 1 ./readings.sh | stdbuf -oL jq --compact-output | ./circular-buffer.py 10 | ./report.py report.txt
+```
