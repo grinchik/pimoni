@@ -6,6 +6,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from dataclasses import dataclass, fields
 from enum import Enum
+from typing import assert_never
 
 if len(sys.argv) != 3:
     print("Usage: report.py <ip> <port>", file=sys.stderr)
@@ -55,6 +56,24 @@ def reading_list(raw_reading_list):
 
     return READING_LIST
 
+def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
+    """Convert measurement to human-readable format"""
+    match measurement.unit:
+        case Unit.KELVIN:
+            return measurement.value - 273.15, "C"
+        case Unit.HERTZ:
+            return measurement.value / 1_000_000_000, "GHz"
+        case Unit.KHZ:
+            return measurement.value / 1_000_000, "GHz"
+        case Unit.MILLICELSIUS:
+            return measurement.value / 1000, "C"
+        case Unit.CELSIUS:
+            return measurement.value, "C"
+        case Unit.SECONDS:
+            return measurement.value, "s"
+        case _ as unreachable:
+            assert_never(unreachable)
+
 def render(reading_list):
     LINE_LIST = []
 
@@ -64,8 +83,13 @@ def render(reading_list):
         row = metric.ljust(20) + " | "
 
         for reading in reading_list:
-            value = getattr(reading, metric).value
-            row += f"{value:.1f}".ljust(12) + " | "
+            measurement = getattr(reading, metric)
+            value, unit = convert_to_human_readable(measurement)
+
+            if metric == "timestamp":
+                row += f"{value:.0f} {unit}".rjust(12) + " | "
+            else:
+                row += f"{value:.2f} {unit}".rjust(12) + " | "
 
         LINE_LIST.append(row)
 
