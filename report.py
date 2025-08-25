@@ -2,14 +2,19 @@
 
 import sys
 import json
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from dataclasses import dataclass, fields
 from enum import Enum
 
-if len(sys.argv) != 2:
-    print("Usage: report.py <output_file>", file=sys.stderr)
+if len(sys.argv) != 3:
+    print("Usage: report.py <ip> <port>", file=sys.stderr)
     sys.exit(1)
 
-OUTPUT_FILE = sys.argv[1]
+IP = sys.argv[1]
+PORT = int(sys.argv[2])
+
+latest_line = ""
 
 class Unit(Enum):
     SECONDS = "s"
@@ -64,16 +69,31 @@ def render(reading_list):
 
         LINE_LIST.append(row)
 
-    return "\n".join(LINE_LIST)
+    return "\n".join(LINE_LIST) + "\n"
 
-def save_to_file(file_name, file_content):
-    with open(file_name, 'w') as f:
-        f.write(file_content)
+class DashboardHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/dashboard':
+            if latest_line:
+                output = render(reading_list(json.loads(latest_line)))
+            else:
+                output = ""
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(output.encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+def start_web_server():
+    server = HTTPServer((IP, PORT), DashboardHandler)
+    server.serve_forever()
+
+web_thread = threading.Thread(target=start_web_server, daemon=True)
+web_thread.start()
 
 for line in sys.stdin:
     line = line.strip()
-
-    RAW_READING_LIST = json.loads(line)
-    READING_LIST = reading_list(RAW_READING_LIST)
-    OUTPUT = render(READING_LIST)
-    save_to_file(OUTPUT_FILE, OUTPUT)
+    latest_line = line

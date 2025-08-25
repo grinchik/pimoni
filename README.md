@@ -32,8 +32,11 @@ sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
 sudo ./watch.sh 5 "./readings.sh | jq --compact-output | tee --append log.jsonl | ./thermal-shutdown.sh 75"
 ```
 
-### Continuous monitoring with visual file output
+### Continuous monitoring with web dashboard
 ```sh
-# Render table of last N measurements to file
-sudo ./watch.sh 1 ./readings.sh | stdbuf -oL jq --compact-output | ./circular-buffer.py 10 | ./report.py report.txt
+# Start web server on 127.0.0.1:3000 with live metrics table
+sudo ./watch.sh 1 ./readings.sh | stdbuf -oL jq --compact-output | ./circular-buffer.py 10 | ./report.py 127.0.0.1 3000
+
+# Access dashboard:
+curl http://127.0.0.1:3000/dashboard
 ```
