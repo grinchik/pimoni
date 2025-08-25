@@ -6,7 +6,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from dataclasses import dataclass, fields
 from enum import Enum
-from typing import assert_never
+from typing import assert_never, TypedDict
 
 if len(sys.argv) != 3:
     print("Usage: report.py <ip> <port>", file=sys.stderr)
@@ -16,6 +16,10 @@ IP = sys.argv[1]
 PORT = int(sys.argv[2])
 
 latest_line = ""
+
+class RawMeasurement(TypedDict):
+    value: float
+    unit: str
 
 class Unit(Enum):
     SECONDS = "s"
@@ -43,14 +47,19 @@ class Reading:
     nvme0_temperature: Measurement
     nvme1_temperature: Measurement
 
-def reading_list(raw_reading_list):
-    READING_LIST = []
+def reading_list(
+    raw_reading_list: list[dict[str, RawMeasurement]]
+) -> list[Reading]:
+    READING_LIST: list[Reading] = []
 
     for raw_reading_list_item in raw_reading_list:
-        READING = {}
+        READING: dict[str, Measurement] = {}
 
         for key, value in raw_reading_list_item.items():
-            READING[key] = Measurement(value["value"], Unit(value["unit"]))
+            READING[key] = Measurement(
+                float(value["value"]),
+                Unit(value["unit"])
+            )
 
         READING_LIST.append(Reading(**READING))
 
@@ -74,8 +83,8 @@ def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
         case _ as unreachable:
             assert_never(unreachable)
 
-def render(reading_list):
-    LINE_LIST = []
+def render(reading_list: list[Reading]) -> str:
+    LINE_LIST: list[str] = []
 
     METRIC_LIST = [field.name for field in fields(Reading)]
 
