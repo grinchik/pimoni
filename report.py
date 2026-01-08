@@ -47,23 +47,16 @@ class Reading:
     nvme0_temperature: Measurement
     nvme1_temperature: Measurement
 
-def reading_list(
-    raw_reading_list: list[dict[str, RawMeasurement]]
-) -> list[Reading]:
-    READING_LIST: list[Reading] = []
+def reading(raw_reading: dict[str, RawMeasurement]) -> Reading:
+    READING: dict[str, Measurement] = {}
 
-    for raw_reading_list_item in raw_reading_list:
-        READING: dict[str, Measurement] = {}
+    for key, value in raw_reading.items():
+        READING[key] = Measurement(
+            float(value["value"]),
+            Unit(value["unit"])
+        )
 
-        for key, value in raw_reading_list_item.items():
-            READING[key] = Measurement(
-                float(value["value"]),
-                Unit(value["unit"])
-            )
-
-        READING_LIST.append(Reading(**READING))
-
-    return READING_LIST
+    return Reading(**READING)
 
 def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
     """Convert measurement to human-readable format"""
@@ -83,22 +76,20 @@ def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
         case _ as unreachable:
             assert_never(unreachable)
 
-def render(reading_list: list[Reading]) -> str:
+def render(reading: Reading) -> str:
     LINE_LIST: list[str] = []
 
     METRIC_LIST = [field.name for field in fields(Reading)]
+    MAX_METRIC_LEN = max(len(metric) for metric in METRIC_LIST)
 
     for metric in METRIC_LIST:
-        row = metric.ljust(20) + " | "
+        measurement = getattr(reading, metric)
+        value, unit = convert_to_human_readable(measurement)
 
-        for reading in reading_list:
-            measurement = getattr(reading, metric)
-            value, unit = convert_to_human_readable(measurement)
-
-            if metric == "timestamp":
-                row += f"{value:.0f} {unit}".rjust(12) + " | "
-            else:
-                row += f"{value:.2f} {unit}".rjust(12) + " | "
+        if metric == "timestamp":
+            row = f"{metric.ljust(MAX_METRIC_LEN)} | {value:.0f} {unit}"
+        else:
+            row = f"{metric.ljust(MAX_METRIC_LEN)} | {value:.2f} {unit}"
 
         LINE_LIST.append(row)
 
@@ -108,7 +99,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/dashboard':
             if latest_line:
-                output = render(reading_list(json.loads(latest_line)))
+                output = render(reading(json.loads(latest_line)))
             else:
                 output = ""
 
