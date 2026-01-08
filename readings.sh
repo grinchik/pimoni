@@ -24,6 +24,7 @@ NVME1_TEMPERATURE=$(echo "${NVME1_SMART_LOG}" | jq .temperature)
 
 jq \
     --null-input \
+    --compact-output \
     --argjson CPU_CORE0_FREQ "${CPU_CORE0_FREQ}" \
     --argjson CPU_CORE1_FREQ "${CPU_CORE1_FREQ}" \
     --argjson CPU_CORE2_FREQ "${CPU_CORE2_FREQ}" \

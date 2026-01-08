@@ -35,7 +35,7 @@ sudo ./watch.sh 5 "./readings.sh | jq --compact-output | tee --append log.jsonl 
 ### Continuous monitoring with web dashboard
 ```sh
 # Start web server on 127.0.0.1:3000 with live metrics table
-sudo ./watch.sh 1 ./readings.sh | stdbuf -oL jq --compact-output | ./report.py 127.0.0.1 3000
+sudo ./watch.sh 1 ./readings.sh | ./report.py 127.0.0.1 3000
 
 # Access dashboard:
 curl http://127.0.0.1:3000/dashboard
