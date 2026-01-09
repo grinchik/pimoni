@@ -69,3 +69,27 @@ sudo ./watch.sh 1 ./readings.sh | ./display.py
 # Use tee to send output to both report.py and display.py
 sudo ./watch.sh 1 ./readings.sh | tee >(./report.py 127.0.0.1 3000) | ./display.py
 ```
+
+## Running as a systemd service
+
+> [!WARNING]
+> The service file `pimoni.service` has a hardcoded path `/home/rpi5/pimoni`.
+> If your installation directory is different, edit the `ExecStart` line before copying it.
+
+### Setup
+
+1. Create a virtual environment and install dependencies:
+```sh
+cd /home/rpi5/pimoni
+python3 -m venv venv
+source venv/bin/activate
+pip install --requirement requirements.txt
+```
+
+2. Copy the service file and enable it:
+```sh
+sudo cp pimoni.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable pimoni
+sudo systemctl start pimoni
+```

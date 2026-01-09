@@ -1,6 +1,8 @@
 *
 !/.gitignore
 !/display.py
+!/pimoni-service.sh
+!/pimoni.service
 !/readings.sh
 !/README.md
 !/report.py

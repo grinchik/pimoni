@@ -1,0 +1,13 @@
+[Unit]
+Description=pimoni
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/rpi5/pimoni/pimoni-service.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
