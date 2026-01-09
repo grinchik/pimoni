@@ -28,6 +28,7 @@ class Unit(Enum):
     CELSIUS = "C"
     HERTZ = "Hz"
     KELVIN = "K"
+    RPM = "RPM"
 
 @dataclass
 class Measurement:
@@ -46,6 +47,7 @@ class Reading:
     vcgencmd_arm_freq: Measurement
     nvme0_temperature: Measurement
     nvme1_temperature: Measurement
+    fan_rpm: Measurement
 
 def reading(raw_reading: dict[str, RawMeasurement]) -> Reading:
     READING: dict[str, Measurement] = {}
@@ -73,6 +75,8 @@ def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
             return measurement.value, "C"
         case Unit.SECONDS:
             return measurement.value, "s"
+        case Unit.RPM:
+            return measurement.value, "RPM"
         case _ as unreachable:
             assert_never(unreachable)
 
@@ -86,7 +90,7 @@ def render(reading: Reading) -> str:
         measurement = getattr(reading, metric)
         value, unit = convert_to_human_readable(measurement)
 
-        if metric == "timestamp":
+        if metric == "timestamp" or metric == "fan_rpm":
             row = f"{metric.ljust(MAX_METRIC_LEN)} | {value:.0f} {unit}"
         else:
             row = f"{metric.ljust(MAX_METRIC_LEN)} | {value:.2f} {unit}"

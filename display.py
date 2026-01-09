@@ -31,6 +31,7 @@ class Unit(Enum):
     CELSIUS = "C"
     HERTZ = "Hz"
     KELVIN = "K"
+    RPM = "RPM"
 
 @dataclass
 class Measurement:
@@ -49,6 +50,7 @@ class Reading:
     vcgencmd_arm_freq: Measurement
     nvme0_temperature: Measurement
     nvme1_temperature: Measurement
+    fan_rpm: Measurement
 
 def reading(raw_reading: dict[str, RawMeasurement]) -> Reading:
     READING: dict[str, Measurement] = {}
@@ -75,6 +77,8 @@ def convert_to_human_readable(measurement: Measurement) -> tuple[float, str]:
             return measurement.value, "C"
         case Unit.SECONDS:
             return measurement.value, "s"
+        case Unit.RPM:
+            return measurement.value, "RPM"
         case _ as unreachable:
             assert_never(unreachable)
 
@@ -91,11 +95,14 @@ def format_display(r: Reading) -> list[str]:
     nvme0, _ = convert_to_human_readable(r.nvme0_temperature)
     nvme1, _ = convert_to_human_readable(r.nvme1_temperature)
 
+    fan_rpm, _ = convert_to_human_readable(r.fan_rpm)
+
     line1 = f"CPU GHz:    {cpu_max_ghz:.2f}"
     line2 = f"CPU  °C: {round(cpu_temp)} | {round(vcgencmd_temp)}"
     line3 = f"NVME °C: {round(nvme0)} | {round(nvme1)}"
+    line4 = f"FAN RPM:{int(fan_rpm):>8}"
 
-    return [line1, line2, line3]
+    return [line1, line2, line3, line4]
 
 def display_lines(lines: list[str]):
     LINE_HEIGHT = FONT_SIZE

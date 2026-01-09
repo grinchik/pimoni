@@ -14,6 +14,9 @@ VCGENCMD_ARM_FREQ=$(vcgencmd measure_clock arm | cut -d'=' -f2)
 CPU_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)
 VCGENCMD_TEMP=$(vcgencmd measure_temp | cut -d'=' -f2 | cut -d"'" -f1)
 
+# Fan
+FAN_RPM=$(cat /sys/devices/platform/cooling_fan/hwmon/hwmon4/fan1_input)
+
 # Storage
 NVME0_SMART_LOG=$(nvme smart-log /dev/nvme0 --output-format json)
 NVME1_SMART_LOG=$(nvme smart-log /dev/nvme1 --output-format json)
@@ -34,6 +37,7 @@ jq \
     --argjson VCGENCMD_ARM_FREQ "${VCGENCMD_ARM_FREQ}" \
     --argjson NVME0_TEMPERATURE "${NVME0_TEMPERATURE}" \
     --argjson NVME1_TEMPERATURE "${NVME1_TEMPERATURE}" \
+    --argjson FAN_RPM "${FAN_RPM}" \
     --argjson TIMESTAMP "${TIMESTAMP}" \
     '{
         timestamp: { value: $TIMESTAMP, unit: "s" },
@@ -45,6 +49,7 @@ jq \
         vcgencmd_temp: { value: $VCGENCMD_TEMP, unit: "C" },
         vcgencmd_arm_freq: { value: $VCGENCMD_ARM_FREQ, unit: "Hz" },
         nvme0_temperature: { value: $NVME0_TEMPERATURE, unit: "K" },
-        nvme1_temperature: { value: $NVME1_TEMPERATURE, unit: "K" }
+        nvme1_temperature: { value: $NVME1_TEMPERATURE, unit: "K" },
+        fan_rpm: { value: $FAN_RPM, unit: "RPM" }
     }' \
 ;
