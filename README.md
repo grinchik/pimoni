@@ -1,65 +1,26 @@
 # pimoni
 
-A system monitoring script for Raspberry Pi 5 with dual NVMe HAT that collects hardware metrics and outputs them in structured JSON format (JSONL-ready).
-
-## Features
-
-- **CPU Monitoring**: Individual core frequencies and temperature readings
-- **Storage Monitoring**: NVMe drive temperatures via SMART logs
-- **Structured Output**: JSON format with values and units for easy parsing
+System monitoring for Raspberry Pi 5 in Argon ONE V5 M.2 dual NVME case.
+Displays metrics on the built-in OLED screen.
 
 ## Requirements
 
-- Raspberry Pi 5
-- Dual NVMe HAT with two NVMe drives (`/dev/nvme0`, `/dev/nvme1`)
-- `jq` for JSON processing
+- Raspberry Pi 5 in Argon ONE V5 M.2 dual NVME case
+- Argon ONE V5 Industria OLED Display Module
+- Two NVMe drives (`/dev/nvme0`, `/dev/nvme1`)
 - `nvme-cli` for NVMe SMART data
+- `fonts-terminus`
+- `luma.oled` python package
+- `Pillow` python package
 
 ## Installation
 
-### Font packages
+1. Install system dependencies:
 ```sh
-sudo apt install fonts-terminus
+sudo apt install fonts-terminus nvme-cli
 ```
 
-Make sure the font path matches `FONT_PATH` in `display.py`:
-```sh
-ls /usr/share/fonts/truetype/terminus/
-```
-
-### Python dependencies
-```sh
-pip install --requirement requirements.txt
-```
-
-## Usage
-
-### Single measurement
-```sh
-sudo ./readings.sh
-```
-
-### Continuous monitoring
-```sh
-# Log measurements every 5 seconds to JSONL file
-sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
-```
-
-### OLED display output
-```sh
-# Output to OLED display (128x64 SSD1306 via I2C)
-sudo ./watch.sh 1 ./readings.sh | ./display.py
-```
-
-## Running as a systemd service
-
-> [!WARNING]
-> The service file `pimoni.service` has a hardcoded path `/home/rpi5/pimoni`.
-> If your installation directory is different, edit the `ExecStart` line before copying it.
-
-### Setup
-
-1. Create a virtual environment and install dependencies:
+2. Create a virtual environment and install Python dependencies:
 ```sh
 cd /home/rpi5/pimoni
 python3 -m venv venv
@@ -67,10 +28,14 @@ source venv/bin/activate
 pip install --requirement requirements.txt
 ```
 
-2. Copy the service file and enable it:
+3. Copy the systemd service file and enable it:
 ```sh
 sudo cp pimoni.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable pimoni
 sudo systemctl start pimoni
 ```
+
+> [!NOTE]
+> The service file has a hardcoded path `/home/rpi5/pimoni`.
+> Edit `pimoni.service` if your installation directory is different.
