@@ -15,6 +15,7 @@ DISPLAY_HEIGHT = 64
 
 serial = i2c(port=1, address=0x3c)
 device = ssd1306(serial, width=DISPLAY_WIDTH, height=DISPLAY_HEIGHT)
+device.contrast(0)
 
 FONT_PATH = "/usr/share/fonts/truetype/terminus/TerminusTTF-4.46.0.ttf"
 FONT_SIZE = 16
