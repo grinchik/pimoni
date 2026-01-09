@@ -6,7 +6,6 @@ A system monitoring script for Raspberry Pi 5 with dual NVMe HAT that collects h
 
 - **CPU Monitoring**: Individual core frequencies and temperature readings
 - **Storage Monitoring**: NVMe drive temperatures via SMART logs
-- **Thermal Protection**: Automatic shutdown on temperature thresholds
 - **Structured Output**: JSON format with values and units for easy parsing
 
 ## Requirements
@@ -44,9 +43,6 @@ sudo ./readings.sh
 ```sh
 # Log measurements every 5 seconds to JSONL file
 sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
-
-# Monitor with thermal protection (automatic shutdown at 75°C)
-sudo ./watch.sh 5 "./readings.sh | jq --compact-output | tee --append log.jsonl | ./thermal-shutdown.sh 75"
 ```
 
 ### OLED display output
