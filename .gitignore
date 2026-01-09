@@ -1,7 +1,9 @@
 *
 !/.gitignore
-!/display.py
-!/pimoni-service.sh
+!/display-hide.py
+!/display-show.py
+!/pimoni-service-start.sh
+!/pimoni-service-stop.sh
 !/pimoni.service
 !/readings.sh
 !/README.md

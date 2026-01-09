@@ -9,6 +9,6 @@ source venv/bin/activate;
     1 \
     ./readings.sh \
 | \
-python ./display.py \
+python ./display-show.py \
 && \
 true;

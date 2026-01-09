@@ -5,7 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/rpi5/pimoni/pimoni-service.sh
+ExecStart=/home/rpi5/pimoni/pimoni-service-start.sh
+ExecStop=/home/rpi5/pimoni/pimoni-service-stop.sh
 Restart=always
 RestartSec=5
 
