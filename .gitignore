@@ -1,0 +1,7 @@
+*
+!/.gitignore
+!/readings.sh
+!/README.md
+!/report.py
+!/thermal-shutdown.sh
+!/watch.sh
