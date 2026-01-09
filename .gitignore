@@ -5,7 +5,6 @@
 !/pimoni.service
 !/readings.sh
 !/README.md
-!/report.py
 !/requirements.txt
 !/thermal-shutdown.sh
 !/watch.sh

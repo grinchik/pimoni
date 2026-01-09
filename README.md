@@ -49,25 +49,10 @@ sudo ./watch.sh 5 "./readings.sh | jq --compact-output >> log.jsonl"
 sudo ./watch.sh 5 "./readings.sh | jq --compact-output | tee --append log.jsonl | ./thermal-shutdown.sh 75"
 ```
 
-### Continuous monitoring with web dashboard
-```sh
-# Start web server on 127.0.0.1:3000 with live metrics table
-sudo ./watch.sh 1 ./readings.sh | ./report.py 127.0.0.1 3000
-
-# Access dashboard:
-curl http://127.0.0.1:3000/dashboard
-```
-
 ### OLED display output
 ```sh
 # Output to OLED display (128x64 SSD1306 via I2C)
 sudo ./watch.sh 1 ./readings.sh | ./display.py
-```
-
-### Combined: web dashboard + OLED display
-```sh
-# Use tee to send output to both report.py and display.py
-sudo ./watch.sh 1 ./readings.sh | tee >(./report.py 127.0.0.1 3000) | ./display.py
 ```
 
 ## Running as a systemd service

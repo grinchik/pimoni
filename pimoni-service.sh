@@ -9,10 +9,6 @@ source venv/bin/activate;
     1 \
     ./readings.sh \
 | \
-    tee \
-        >(python ./report.py 0.0.0.0 3100) \
-    | \
-        python ./display.py \
-    \
+python ./display.py \
 && \
 true;
