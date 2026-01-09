@@ -16,6 +16,23 @@ A system monitoring script for Raspberry Pi 5 with dual NVMe HAT that collects h
 - `jq` for JSON processing
 - `nvme-cli` for NVMe SMART data
 
+## Installation
+
+### Font packages
+```sh
+sudo apt install fonts-terminus
+```
+
+Make sure the font path matches `FONT_PATH` in `display.py`:
+```sh
+ls /usr/share/fonts/truetype/terminus/
+```
+
+### Python dependencies
+```sh
+pip install --requirement requirements.txt
+```
+
 ## Usage
 
 ### Single measurement
@@ -39,4 +56,16 @@ sudo ./watch.sh 1 ./readings.sh | ./report.py 127.0.0.1 3000
 
 # Access dashboard:
 curl http://127.0.0.1:3000/dashboard
+```
+
+### OLED display output
+```sh
+# Output to OLED display (128x64 SSD1306 via I2C)
+sudo ./watch.sh 1 ./readings.sh | ./display.py
+```
+
+### Combined: web dashboard + OLED display
+```sh
+# Use tee to send output to both report.py and display.py
+sudo ./watch.sh 1 ./readings.sh | tee >(./report.py 127.0.0.1 3000) | ./display.py
 ```
